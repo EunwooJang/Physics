@@ -49,38 +49,49 @@ plt.savefig("Trajectory.png", dpi=300)
 plt.show()
 plt.close()
 
+#Assignment 3
 
-# Assignment 3
 from datetime import datetime
+import requests
+
+
+url1 = "https://raw.githubusercontent.com/EunwooJang/Physics/main/seoul_temp.txt"
+url2 = "https://raw.githubusercontent.com/EunwooJang/Physics/main/seoul_temp.txt"
+
+
+response1 = requests.get(url1)
+with open("seoul_temp.txt", "wb") as file:
+    file.write(response1.content)
+
+response2 = requests.get(url2)
+with open("seoul_temp1.txt", "wb") as file:
+    file.write(response2.content)
 
 filenames = ["seoul_temp.txt", "seoul_temp1.txt"]
 
-plt.figure(figsize=(15, 5))  # 그래프 크기 설정
+plt.figure(figsize=(16, 5))
 
-dates, avg_values = [], []  # 날짜 및 평균값
+dates, avg_values = [], []
 
 for i, filename in enumerate(filenames):
     with open(filename, "r") as file:
         for line in file:
-            parts = line.strip().split()  # 공백 기준 분리
-            if len(parts) == 4:  # 데이터 유효성 검사
-                # 날짜 변환
+            parts = line.strip().split()
+            if len(parts) == 4:
                 date_obj = datetime.strptime(parts[0], "%Y-%m-%d")
                 dates.append(np.datetime64(date_obj))
-                avg_values.append(float(parts[2]))  # 두 번째 값 사용
+                avg_values.append(float(parts[2]))  # 평균값
 
     arr_dates = np.array(dates)
     arr_avg = np.array(avg_values)
     
     plt.plot(arr_dates, arr_avg, marker="o", linestyle="None", color="red")
 
-# 그래프 설정
 plt.xlabel("Date")
-plt.ylabel("Average Tempreature (˚C)")
-plt.title("1908-2021 Seoul Average Temperature")
+plt.ylabel("Average Temperature (˚C)")
+plt.title("Seoul Average Temperature (1908-2021)")
 plt.xticks(rotation=45)
 plt.grid(True)
 plt.savefig("Seoul Average Temperature (1908-2021).png", dpi=300)
 plt.show()
 plt.close()
-
