@@ -86,7 +86,7 @@ for i, filename in enumerate(filenames):
     
     plt.plot(arr_dates, arr_avg, marker="o", linestyle="None", color="red")
 
-plt.xlabel("Date")
+plt.xlabel("Year")
 plt.ylabel("Average Temperature (˚C)")
 plt.title("Seoul Average Temperature (1908-2021)")
 plt.xticks(rotation=45)
