@@ -50,7 +50,6 @@ plt.show()
 plt.close()
 
 #Assignment 3
-
 from datetime import datetime
 import requests
 
@@ -59,15 +58,15 @@ url1 = "https://raw.githubusercontent.com/EunwooJang/Physics/main/seoul_temp.txt
 url2 = "https://raw.githubusercontent.com/EunwooJang/Physics/main/seoul_temp.txt"
 
 
+filenames = ["seoul_temp.txt", "seoul_temp1.txt"]
+
 response1 = requests.get(url1)
-with open("seoul_temp.txt", "wb") as file:
+with open(filenames[0], "wb") as file:
     file.write(response1.content)
 
 response2 = requests.get(url2)
-with open("seoul_temp1.txt", "wb") as file:
+with open(filenames[1], "wb") as file:
     file.write(response2.content)
-
-filenames = ["seoul_temp.txt", "seoul_temp1.txt"]
 
 plt.figure(figsize=(16, 5))
 
