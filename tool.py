@@ -140,7 +140,7 @@ def curve_fitting(mode, f, x, y, degree, c=1e-2, eps=1e-8, max_iter=10000, init_
         print("Invalid mode")
 
 # ODE SDE
-class ODEGeneral:
+class ODE:
     def __init__(self, v0, f, T, dt, x0=None):
 
         self.t = np.linspace(0, T, num=int(abs(T/dt)) + 1)
@@ -297,7 +297,7 @@ def plot_all(X, Y, Z, x_label='X', y_label='Y', z_label='Z', Title='Plot'):
     plt.close()
 
 #FDM Method
-class FDMSolver1D_LinearCombo:
+class FDM:
     def __init__(self, domain, N):
         self.x0, self.xL = domain
         self.N = N
@@ -373,7 +373,7 @@ class FDMSolver1D_LinearCombo:
         plt.show()
 
 # FEM Method
-class FEMSolver1D_LinearCombo:
+class FEM:
     def __init__(self, domain=None, N=None, mesh=None):
         if mesh is not None:
             self.nodes = np.array(mesh)
@@ -446,7 +446,7 @@ class FEMSolver1D_LinearCombo:
         plt.show()
 
 # Numerical Integral
-def integral(mode, f, dim, bounds, N):
+def Numerical_Integral(mode, f, dim, bounds, N):
 
     def trapezoidal_nd():
         h = [(b - a) / N for (a, b) in bounds]
