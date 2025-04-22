@@ -446,7 +446,7 @@ class FEM:
         plt.show()
 
 # Numerical Integral
-def Numerical_Integral(mode, f, dim, bounds, N):
+def numerical_integral(mode, f, dim, bounds, N):
 
     def trapezoidal_nd():
         h = [(b - a) / N for (a, b) in bounds]
