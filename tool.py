@@ -1,8 +1,11 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import urllib.request
+
 # Root finding
 def root_finding(mode, f, df, i_x_1, i_x_2, eps=1e-8):
 
     def bisection_method():
-
         x_1 = i_x_1
         x_2 = i_x_2
         array = []
@@ -17,7 +20,6 @@ def root_finding(mode, f, df, i_x_1, i_x_2, eps=1e-8):
                 break
         return array
 
-
     def newton_method():
         x_1 = i_x_2
         array = []
@@ -29,26 +31,18 @@ def root_finding(mode, f, df, i_x_1, i_x_2, eps=1e-8):
             x_1 = x_2
         return array
 
-
     def secant_method():
-
         x_1 = i_x_1
         x_2 = i_x_2
-
         array = []
-
         for _ in range(1000):
             df = (f(x_2) - f(x_1)) / (x_2 - x_1)
             x_3 = x_2 - f(x_2) / df
-
             array.append(x_3)
-
             if np.abs(x_3 - x_2) < eps:
                 break
-
             x_1 = x_2
             x_2 = x_3
-
         return array
 
     if mode == 1:
@@ -64,9 +58,8 @@ def root_finding(mode, f, df, i_x_1, i_x_2, eps=1e-8):
         print("Invalid mode")
         return
 
-
 # Curve fitting
-def curve_fitting(mode, f, x, y, degree, c=1e-2, eps=1e-8, max_iter=10000):
+def curve_fitting(mode, f, x, y, degree, c=1e-2, eps=1e-8, max_iter=10000, init_parm=None):
 
     def least_square_method():
 
@@ -85,7 +78,7 @@ def curve_fitting(mode, f, x, y, degree, c=1e-2, eps=1e-8, max_iter=10000):
 
     def gradient_descent_analytic():
 
-        a = np.ones(degree)
+        a = (init_parm if init_parm!=None else np.ones(degree))
         dEda_history = []
         iter = 0
 
@@ -100,14 +93,16 @@ def curve_fitting(mode, f, x, y, degree, c=1e-2, eps=1e-8, max_iter=10000):
             iter += 1
             for i in range(degree):
                 delta[i] = c * dEda_i(a, i)
-            a += delta
+            a -= delta
             dEda_history.append(delta.copy())
 
         return a, dEda_history
 
 
     def grad_descent_approx():
-        a = np.ones(degree)
+
+        a = (init_parm if init_parm!=None else np.ones(degree))
+
         dEda_history = []
         iter = 0
 
@@ -136,16 +131,15 @@ def curve_fitting(mode, f, x, y, degree, c=1e-2, eps=1e-8, max_iter=10000):
         return least_square_method()
 
     elif mode == 2:
-        return grad_descent_approx()
+        return gradient_descent_analytic()
 
     elif mode == 3:
-        return gradient_descent_analytic()
+        return grad_descent_approx()
 
     else:
         print("Invalid mode")
 
-
-#ODE
+# ODE SDE
 class ODEGeneral:
     def __init__(self, v0, f, T, dt, x0=None):
 
@@ -259,7 +253,50 @@ class ODEGeneral:
 
         return self.t.copy(), self.v.copy(), self.x.copy()
 
-#FDM
+# PDE
+# Drawing Fuction
+def plot_all(X, Y, Z, x_label='X', y_label='Y', z_label='Z', Title='Plot'):
+
+    # Contour plot
+    plt.figure(figsize=(12, 6))
+    plt.contour(X, Y, Z, levels=np.linspace(np.min(Z), np.max(Z), 100))
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
+    plt.title(Title + ' - Contour')
+    ax = plt.gca()
+    ax.set_aspect('equal')
+    cb = plt.colorbar()
+    cb.set_label(z_label)
+    plt.show()
+    plt.close()
+
+    # Pcolor plot
+    plt.figure(figsize=(12, 6))
+    ax = plt.gca()
+    cax = ax.pcolor(X, Y, Z)
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
+    plt.title(Title + ' - Pcolor')
+    ax.set_aspect('equal')
+    cb = plt.colorbar(cax, ax=ax)
+    cb.set_label(z_label)
+    plt.show()
+    plt.close()
+
+    # Surface plot
+    plt.figure(figsize=(12, 6))
+    ax = plt.axes(projection='3d')
+    surf = ax.plot_surface(X, Y, Z, cmap='viridis')
+    fig = plt.gcf()
+    fig.colorbar(surf, ax=ax, shrink=0.5, aspect=5)
+    ax.set_xlabel(x_label)
+    ax.set_ylabel(y_label)
+    ax.set_zlabel(z_label)
+    ax.set_title(Title + ' - Surface')
+    plt.show()
+    plt.close()
+
+#FDM Method
 class FDMSolver1D_LinearCombo:
     def __init__(self, domain, N):
         self.x0, self.xL = domain
@@ -335,17 +372,23 @@ class FDMSolver1D_LinearCombo:
         plt.grid(True)
         plt.show()
 
-
 # FEM Method
 class FEMSolver1D_LinearCombo:
-    def __init__(self, domain, N):
-        self.x0, self.xL = domain
-        self.N = N
-        self.h = (self.xL - self.x0) / N
-        self.nodes = np.linspace(self.x0, self.xL, N + 1)
+    def __init__(self, domain=None, N=None, mesh=None):
+        if mesh is not None:
+            self.nodes = np.array(mesh)
+            self.N = len(self.nodes) - 1
+            self.x0 = self.nodes[0]
+            self.xL = self.nodes[-1]
+        elif domain is not None and N is not None:
+            self.x0, self.xL = domain
+            self.N = N
+            self.nodes = np.linspace(self.x0, self.xL, N + 1)
+        else:
+            raise ValueError("Either (domain, N) or mesh must be provided")
 
-        self.K = np.zeros((N+1, N+1))
-        self.F = np.zeros(N+1)
+        self.K = np.zeros((self.N+1, self.N+1))
+        self.F = np.zeros(self.N+1)
         self.bc = []
 
     def add_operator(self, order, coef_func):
@@ -402,8 +445,7 @@ class FEMSolver1D_LinearCombo:
         plt.legend()
         plt.show()
 
-
-
+# Numerical Integral
 def integral(mode, f, dim, bounds, N):
 
     def trapezoidal_nd():
@@ -468,4 +510,3 @@ def integral(mode, f, dim, bounds, N):
         return trapezoidal_nd()
     elif mode == 2:
         return simpson_nd()
-
